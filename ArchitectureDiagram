@@ -1,0 +1,85 @@
+# Backend/dao/base_dao.py
+from typing import Type, TypeVar, Generic, List, Optional
+
+from sqlalchemy import Integer, Column
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from sqlalchemy.ext.declarative import as_declarative, declared_attr
+
+# Define a generic type variable for the DAO class
+T = TypeVar('T', bound='Base')
+
+
+@as_declarative()
+class Base:
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Define other common columns if needed
+    @declared_attr
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()
+
+
+class BaseDao(Generic[T]):
+    def __init__(self, model: Type[T]):
+        self.model = model
+
+    def get_all(self, db: Session) -> List[T]:
+        """Retrieve all records."""
+        return db.query(self.model).all()
+
+    def get_by_id(self, db: Session, id: int) -> Optional[T]:
+        """Retrieve a record by its ID."""
+        return db.query(self.model).filter(self.model.id == id).first()
+
+    def create(self, db: Session, obj_in: BaseModel) -> T:
+        """Create a new record."""
+        obj = self.model(**obj_in.model_dump())
+        try:
+            db.add(obj)
+            db.commit()
+            db.refresh(obj)
+            return obj
+        except SQLAlchemyError as e:
+            db.rollback()
+            raise Exception(f"Database error occurred: {str(e)}")
+
+    def update(self, db: Session, id: int, obj_in: BaseModel) -> Optional[T]:
+        """Update an existing record."""
+        obj = db.query(self.model).filter(self.model.id == id).first()
+        if obj:
+            for key, value in obj_in.model_dump().items():
+                setattr(obj, key, value)
+            try:
+                db.commit()
+                db.refresh(obj)
+                return obj
+            except SQLAlchemyError as e:
+                db.rollback()
+                raise Exception(f"Database error occurred: {str(e)}")
+        return None
+
+    def delete(self, db: Session, id: int) -> bool:
+        """Delete a record by its ID."""
+        obj = db.query(self.model).filter(self.model.id == id).first()
+        if obj:
+            try:
+                db.delete(obj)
+                db.commit()
+                return True
+            except SQLAlchemyError as e:
+                db.rollback()
+                raise Exception(f"Database error occurred: {str(e)}")
+        return False
+
+    def count(self, db: Session) -> int:
+        """Count the number of records."""
+        return db.query(self.model).count()
+
+    def filter(self, db: Session, **filters) -> List[T]:
+        """Filter records based on given criteria."""
+        query = db.query(self.model)
+        for key, value in filters.items():
+            query = query.filter(getattr(self.model, key) == value)
+        return query.all()

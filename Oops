@@ -1,0 +1,89 @@
+Object-oriented design (OOD) is a methodology for designing software systems using the principles of object-oriented programming (OOP). Here's how you can apply key object-oriented principles—encapsulation, inheritance, and polymorphism—when designing classes in Python:
+
+1. Encapsulation
+Encapsulation is the bundling of data (attributes) and methods (functions) that operate on the data into a single unit, known as a class. It helps in hiding the internal state and requiring all interactions to be performed through well-defined interfaces (methods).
+
+Example:
+
+python
+Copy code
+class Car:
+    def __init__(self, make, model):
+        self.make = make  # Public attribute
+        self.__model = model  # Private attribute
+
+    def display_info(self):
+        return f"{self.make} {self.__model}"
+
+    def set_model(self, model):
+        self.__model = model
+
+car = Car("Toyota", "Camry")
+print(car.make)  # Accessing public attribute
+# print(car.__model)  # This would raise an AttributeError because __model is private
+print(car.display_info())  # Accessing through method
+car.set_model("Corolla")  # Updating private attribute through method
+print(car.display_info())
+Public vs. Private Attributes: Use single underscore _ prefix for protected attributes and double underscore __ prefix for private attributes.
+Methods: Methods display_info() and set_model() encapsulate behavior that operates on the internal state of the Car class.
+2. Inheritance
+Inheritance allows one class (subclass or derived class) to inherit the properties and methods of another class (base class or superclass). It promotes code reuse and allows you to create a hierarchy of classes.
+
+Example:
+
+python
+Copy code
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        raise NotImplementedError("Subclasses should implement this method")
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name} says Woof!"
+
+class Cat(Animal):
+    def speak(self):
+        return f"{self.name} says Meow!"
+
+dog = Dog("Buddy")
+print(dog.speak())  # Output: Buddy says Woof!
+
+cat = Cat("Whiskers")
+print(cat.speak())  # Output: Whiskers says Meow!
+Base Class (Animal): Defines a common interface (method speak()) which derived classes (Dog, Cat) override.
+Derived Classes (Dog, Cat): Inherit from Animal and provide their specific implementation of speak().
+3. Polymorphism
+Polymorphism allows objects of different classes to be treated as objects of a common superclass. It enables flexibility and dynamic behavior based on the actual type of the object.
+
+Example:
+
+python
+Copy code
+class Shape:
+    def area(self):
+        raise NotImplementedError("Subclasses should implement this method")
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def area(self):
+        return self.width * self.height
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14 * self.radius * self.radius
+
+shapes = [Rectangle(4, 5), Circle(3)]
+
+for shape in shapes:
+    print(f"Area of {type(shape).__name__}: {shape.area()}")
+Base Class (Shape): Declares a method area() which is overridden in subclasses (Rectangle, Circle).
+Polymorphism in Action: Both Rectangle and Circle objects can be treated as Shape objects when calculating area, demonstrating polymorphism.

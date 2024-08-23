@@ -1,0 +1,29 @@
+# Test your FastAPI endpoints
+#"Author @Arun"
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/hello/User
+Accept: application/json
+
+## AUTHENTICATION
+###
+POST http://127.0.0.1:8000/auth/auth-token
+Accept: application/json
+###{
+#        "username":"nextQueue",
+#        "password":"v1"
+#}
+
+#SIGN-IN
+POST http://127.0.0.1:8000/sign-in
+Accept: application/json
+###
+
+#SIGN-UP
+POST http://127.0.0.1:8000/sign-in
+Accept: application/json
+
